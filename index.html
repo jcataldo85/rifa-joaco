@@ -400,8 +400,15 @@
     }
 
     function renderStats(){
+      const statsEl = $('stats');
+      if(!state.user){
+        statsEl.classList.add('hidden');
+        statsEl.innerHTML = '';
+        return;
+      }
+      statsEl.classList.remove('hidden');
       const s = getStats();
-      $('stats').innerHTML = `
+      statsEl.innerHTML = `
         <div class="stat"><label>Recaudado</label><strong class="green">${money(s.revenue)}</strong></div>
         <div class="stat"><label>Falta recaudar</label><strong class="warn">${money(s.missing)}</strong></div>
         <div class="stat"><label>Pagados</label><strong>${s.paid}/${TOTAL_NUMBERS}</strong></div>
@@ -416,8 +423,10 @@
 
     function buildShareText(){
       const available = nums.filter(n => getPublicStatus(n).status === 'free');
-      const s = getStats();
-      return `Gran Rifa · Monopatín Eléctrico\n\nValor por número: $6.000\nDisponibles: ${available.length}/${TOTAL_NUMBERS}\n\nNúmeros disponibles:\n${available.join(', ')}\n\nRecaudado: ${money(s.revenue)}\nFalta recaudar: ${money(s.missing)}`;
+      return `Gran Rifa · Monopatín Eléctrico
+
+Números disponibles para reservar:
+${available.join(', ')}`;
     }
 
     function renderGrid(){
@@ -543,7 +552,7 @@
         const file = new File([blob], 'rifa-joaco-estado.png', {type:'image/png'});
         const shareData = {
           title: 'Gran Rifa · Monopatín Eléctrico',
-          text: 'Estado actualizado de números disponibles para la rifa.',
+          text: 'Números disponibles para reservar en la rifa.',
           files: [file]
         };
 
@@ -595,13 +604,6 @@
       drawGlow(ctx, 120, 980, 420, 'rgba(57,233,145,.10)');
       drawGlow(ctx, 900, 1620, 360, 'rgba(57,233,145,.10)');
 
-      // Precio arriba.
-      drawBrush(ctx, 42, 58, 430, 76, '#39e991', -5);
-      ctx.fillStyle = '#06140d';
-      ctx.textAlign = 'left';
-      ctx.font = '900 34px Inter, Arial, sans-serif';
-      ctx.fillText('$6.000 EL NÚMERO', 88, 108);
-
       // Título grande.
       ctx.fillStyle = '#f5f7f6';
       ctx.font = '94px Anton, Impact, sans-serif';
@@ -631,43 +633,21 @@
         drawScooterIllustration(ctx, 470, 235, 520, 500);
       }
 
-      // Beneficios.
-      drawSpecBadge(ctx, 660, 492, '⚡', 'MOTOR', '250–320 W');
-      drawSpecBadge(ctx, 660, 568, '📍', 'IDEAL', 'USO DIARIO');
-      drawSpecBadge(ctx, 660, 644, '✓', 'FRENOS', 'SEGUROS');
-
-      // Mensaje de sorteo.
-      ctx.fillStyle = '#39e991';
-      ctx.textAlign = 'left';
-      ctx.font = '900 32px Inter, Arial, sans-serif';
-      ctx.fillText('SE SORTEA CUANDO', 70, 695);
-      ctx.fillStyle = '#f5f7f6';
-      ctx.font = '900 38px Inter, Arial, sans-serif';
-      ctx.fillText('NO HAYA MÁS NÚMEROS', 70, 740);
-
-      // Estadísticas compactas.
-      const st = getStats();
-      const available = nums.filter(n => getPublicStatus(n).status === 'free');
-      drawMiniStat(ctx, 70, 780, 'DISPONIBLES', `${st.free}/${TOTAL_NUMBERS}`, '#39e991');
-      drawMiniStat(ctx, 285, 780, 'VALOR', '$6.000', '#f5f7f6');
-      drawMiniStat(ctx, 500, 780, 'PAGADOS', `${st.paid}`, '#ffcc66');
-      drawMiniStat(ctx, 715, 780, 'FALTA', money(st.missing).replace('ARS','').trim(), '#ffcc66');
-
       // Grilla principal 00–70.
       ctx.textAlign = 'left';
       ctx.fillStyle = '#f5f7f6';
       ctx.font = '54px Anton, Impact, sans-serif';
-      ctx.fillText('NÚMEROS DISPONIBLES', 70, 925);
+      ctx.fillText('NÚMEROS DISPONIBLES', 70, 820);
       ctx.fillStyle = '#9aa5af';
       ctx.font = '26px Inter, Arial, sans-serif';
-      ctx.fillText('Verdes: disponibles · Grisados/tachados: ocupados', 70, 964);
+      ctx.fillText('Verdes: disponibles · Grisados/tachados: reservados', 70, 860);
 
       const cols = 10;
       const gap = 6;
       const size = 88;
       const gridW = cols * size + (cols - 1) * gap;
       const startX = Math.floor((W - gridW) / 2);
-      const startY = 1005;
+      const startY = 910;
 
       nums.forEach((n, idx) => {
         const row = Math.floor(idx / cols);
@@ -687,12 +667,9 @@
       ctx.fillStyle = '#06140d';
       ctx.font = '62px Anton, Impact, sans-serif';
       ctx.fillText('NO HAYA MÁS NÚMEROS', W/2, 1764);
-      ctx.fillStyle = '#dce6ea';
-      ctx.font = '32px Inter, Arial, sans-serif';
-      ctx.fillText(`Quedan ${available.length} disponibles`, W/2, 1832);
       ctx.fillStyle = '#39e991';
-      ctx.font = '900 34px Inter, Arial, sans-serif';
-      ctx.fillText('Pedí el tuyo a Natalia o Maxi', W/2, 1880);
+      ctx.font = '900 38px Inter, Arial, sans-serif';
+      ctx.fillText('Pedí tu número a Natalia o Maxi', W/2, 1840);
 
       return new Promise((resolve, reject) => {
         canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('El navegador no pudo exportar el PNG.')), 'image/png', 0.95);
