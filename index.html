@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rifa Joaco · Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#121820;
+      --panel-2:#171f29;
+      --line:#26313d;
+      --green:#39e991;
+      --green-soft:rgba(57,233,145,.14);
+      --green-dark:#1b6b45;
+      --white:#f5f7f6;
+      --muted:#8b96a1;
+      --grey:#5b6672;
+      --grey-dark:#2a323b;
+      --danger:#ff5a5a;
+      --warn:#ffcc66;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at 85% 0%, rgba(57,233,145,.10), transparent 32%),
+        radial-gradient(circle at 0% 40%, rgba(57,233,145,.06), transparent 34%),
+        var(--bg);
+      color:var(--white);
+      font-family:'Inter',sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+    .display{font-family:'Anton',sans-serif;letter-spacing:.5px;text-transform:uppercase;}
+    .wrap{max-width:1020px;margin:0 auto;padding:24px 16px 60px;}
+    .hero{
+      background:linear-gradient(180deg,#101821 0%,#0c1117 100%);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:24px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:before{content:"";position:absolute;inset:-30% -15% auto auto;width:55%;height:155%;background:radial-gradient(circle, rgba(57,233,145,.14), transparent 62%);}
+    .hero > *{position:relative;}
+    .eyebrow{display:inline-block;background:var(--green);color:#06140d;font-weight:900;font-size:12px;letter-spacing:1.4px;padding:6px 11px;transform:skewX(-8deg);margin-bottom:16px;}
+    .eyebrow span{display:inline-block;transform:skewX(8deg);}
+    h1{font-size:clamp(38px,7vw,72px);line-height:.93;margin:0;}
+    h1 .accent{color:var(--green);display:block;}
+    .sub{color:var(--muted);line-height:1.5;margin:10px 0 0;font-size:14px;max-width:760px;}
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+    .btn{border:0;border-radius:12px;padding:12px 16px;font-weight:900;font-size:14px;cursor:pointer;font-family:inherit;transition:.15s;display:inline-flex;gap:8px;align-items:center;justify-content:center;text-decoration:none;}
+    .btn:disabled{opacity:.55;cursor:not-allowed;}
+    .btn-primary{background:var(--green);color:#06140d;}
+    .btn-primary:hover{filter:brightness(1.06);}
+    .btn-ghost{background:transparent;color:#dbe5ea;border:1px solid var(--line);}
+    .btn-danger{background:var(--danger);color:#fff;}
+    .section{margin-top:18px;background:rgba(18,24,32,.92);border:1px solid var(--line);border-radius:22px;padding:18px;}
+    .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+    h2{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:24px;letter-spacing:.5px;margin:0 0 4px;}
+    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px;}
+    .stat{background:#0e141b;border:1px solid var(--line);border-radius:16px;padding:14px;min-height:84px;}
+    .stat label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.5px;margin-bottom:7px;}
+    .stat strong{font-size:22px;line-height:1.1;}
+    .stat .green{color:var(--green);}
+    .stat .warn{color:var(--warn);}
+    .legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 14px;color:#b9c2cb;font-size:13px;}
+    .legend span{display:inline-flex;gap:7px;align-items:center;}
+    .sw{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--line);}
+    .sw-free{background:var(--green-soft);border-color:var(--green);}
+    .sw-reserved{background:#2a323b;}
+    .sw-paid{background:#11161d;border-color:var(--green-dark);}
+    .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;}
+    .num{aspect-ratio:1/1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;border:1.5px solid var(--line);background:var(--panel-2);color:#e7edf1;position:relative;user-select:none;}
+    .num.free{background:var(--green-soft);border-color:var(--green);color:var(--green);box-shadow:0 0 0 1px rgba(57,233,145,.05) inset;}
+    .num.reserved{background:var(--grey-dark);border-color:#333d47;color:#6f7b86;text-decoration:line-through;}
+    .num.paid{background:#0e141b;border-color:var(--green-dark);color:#53606b;text-decoration:line-through;}
+    .num.paid:after,.num.reserved:after{content:"";position:absolute;inset:0;border-radius:10px;background:repeating-linear-gradient(-45deg, transparent 0 5px, rgba(0,0,0,.33) 5px 6px);pointer-events:none;}
+    .num.admin{cursor:pointer;}
+    .num.admin:hover{transform:translateY(-1px);border-color:var(--green);}
+    .num small{position:absolute;right:5px;top:4px;font-size:10px;text-decoration:none;color:var(--green);z-index:1;}
+    .login-box{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+    .field{margin-bottom:12px;}
+    .field label{display:block;font-size:11px;color:#aeb8c1;text-transform:uppercase;font-weight:900;letter-spacing:.5px;margin-bottom:6px;}
+    input,select,textarea{width:100%;background:#0e141b;border:1.5px solid var(--line);color:var(--white);border-radius:11px;padding:12px;font:inherit;font-size:14px;}
+    textarea{min-height:86px;resize:vertical;}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
+    .login-box input{width:220px;}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    .tab{background:#0e141b;border:1px solid var(--line);color:#c6cfd6;border-radius:999px;padding:9px 12px;font-weight:900;cursor:pointer;}
+    .tab.active{background:var(--green);border-color:var(--green);color:#06140d;}
+    .share-card{background:#0e141b;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px;}
+    .share-actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;}
+    .share-text{font-size:13px;color:#c7d0d7;background:#090e13;border:1px solid var(--line);border-radius:12px;padding:12px;white-space:pre-wrap;line-height:1.45;max-height:160px;overflow:auto;}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;}
+    table{width:100%;border-collapse:collapse;min-width:760px;background:#0e141b;}
+    th,td{padding:11px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top;}
+    th{color:#aeb8c1;text-transform:uppercase;font-size:11px;letter-spacing:.4px;}
+    .pill{display:inline-flex;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900;}
+    .pill.paid{background:rgba(57,233,145,.14);color:var(--green);}
+    .pill.pending{background:rgba(255,204,102,.12);color:var(--warn);}
+    .hidden{display:none!important;}
+    .loader{color:#b9c2cb;margin-top:16px;}
+    .error{background:rgba(255,90,90,.12);border:1px solid rgba(255,90,90,.35);color:#ffd0d0;border-radius:14px;padding:12px;line-height:1.45;}
+    .overlay{position:fixed;inset:0;background:rgba(4,6,9,.74);display:none;align-items:flex-end;justify-content:center;z-index:50;backdrop-filter:blur(2px);}
+    .overlay.open{display:flex;}
+    .modal{width:100%;max-width:560px;background:var(--panel);border:1px solid var(--line);border-radius:20px 20px 0 0;padding:20px;max-height:92vh;overflow:auto;}
+    .modal h3{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:24px;margin:0 0 4px;}
+    .modal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+    .toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:80;background:#101820;border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:13px;box-shadow:0 12px 30px rgba(0,0,0,.42);}
+    .toast.err{border-color:var(--danger);color:#ffd0d0;}
+    footer{text-align:center;color:#627181;font-size:12px;margin-top:22px;}
+    @media(max-width:780px){.stats{grid-template-columns:repeat(2,1fr);}.grid{grid-template-columns:repeat(8,1fr);}.hero{padding:20px}.section{padding:14px}.num{font-size:13px}.login-box input{width:100%;}.login-box{display:block}.btn{width:100%;}.top-actions .btn{width:auto;}.section-head .btn{width:auto;}}
+    @media(min-width:620px){.overlay{align-items:center}.modal{border-radius:20px;}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="eyebrow"><span>★ PANEL ADMINISTRATIVO ★</span></div>
+      <h1 class="display">GRAN<span class="accent">RIFA</span>MONOPATÍN<br>ELÉCTRICO</h1>
+      <p class="sub">Vista pública para compartir disponibles y acceso privado para Natalia / Maxi. Los datos personales se guardan solo en Firebase y no se muestran sin iniciar sesión.</p>
+      <div class="top-actions">
+        <button class="btn btn-primary" id="waShareTop">Compartir disponibles</button>
+        <button class="btn btn-ghost" id="copyShareTop">Copiar texto</button>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="section" id="authSection">
+      <div class="section-head">
+        <div>
+          <h2>Ingreso organizador</h2>
+          <p class="sub">Ingresá la contraseña para reservar, editar, liberar números y ver datos privados.</p>
+        </div>
+      </div>
+      <div class="login-box">
+        <div class="field">
+          <label>Contraseña</label>
+          <input id="passwordInput" type="password" placeholder="Contraseña organizador" autocomplete="current-password" />
+        </div>
+        <button class="btn btn-primary" id="loginBtn">Entrar</button>
+      </div>
+      <p class="sub">Usuario técnico configurado en Firebase: <b id="adminEmailLabel"></b></p>
+    </div>
+
+    <div class="section hidden" id="adminBar">
+      <div class="section-head">
+        <div>
+          <h2>Modo organizador activo</h2>
+          <p class="sub">Tocá un número para reservarlo, editarlo o liberarlo.</p>
+        </div>
+        <button class="btn btn-ghost" id="logoutBtn">Salir</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" id="tabGrid">Grilla</button>
+        <button class="tab" id="tabList">Listado reservado</button>
+      </div>
+      <input id="searchInput" placeholder="Buscar por número, nombre, apellido, DNI o nota..." />
+    </div>
+
+    <div class="section" id="shareSection">
+      <div class="section-head">
+        <div>
+          <h2>Números disponibles</h2>
+          <p class="sub">Pantalla limpia: libres resaltados; ocupados grisados y tachados.</p>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="sw sw-free"></i> Disponible</span>
+        <span><i class="sw sw-reserved"></i> Ocupado</span>
+        <span><i class="sw sw-paid"></i> Pagado</span>
+      </div>
+      <div class="share-card">
+        <div class="share-actions">
+          <button class="btn btn-primary" id="waShareBtn">Compartir por WhatsApp</button>
+          <button class="btn btn-ghost" id="copyShareBtn">Copiar texto</button>
+        </div>
+        <div class="share-text" id="shareText"></div>
+      </div>
+      <div class="loader" id="loader">Cargando rifa...</div>
+      <div class="grid" id="publicGrid"></div>
+    </div>
+
+    <div class="section hidden" id="listSection">
+      <div class="section-head">
+        <div>
+          <h2>Listado reservado</h2>
+          <p class="sub">Solo visible con contraseña.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Persona</th>
+              <th>DNI</th>
+              <th>Dirección</th>
+              <th>Nota</th>
+              <th>Pago</th>
+              <th>Registró</th>
+            </tr>
+          </thead>
+          <tbody id="reservedTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer>Rifa Joaco · Valor por número: $6.000 · Total: 71 números</footer>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal" id="modal"></div>
+  </div>
+  <div id="toastHost"></div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+    import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, onSnapshot, writeBatch, serverTimestamp, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+
+    // 1) PEGAR CONFIG DE FIREBASE ACÁ
+    // Firebase Console → Project settings → Your apps → Web app → Firebase SDK config
+    const firebaseConfig = {
+      apiKey: 'AIzaSyDHVeZhtyY6HEZmeplMTe31NmsBkpdcqiI',
+      authDomain: 'rifa-joaco.firebaseapp.com',
+      projectId: 'rifa-joaco',
+      storageBucket: 'rifa-joaco.firebasestorage.app',
+      messagingSenderId: '477837531974',
+      appId: '1:477837531974:web:c505a704a5605388aae347'
+    };
+
+    // 2) MISMO EMAIL QUE CREÁS EN FIREBASE AUTHENTICATION
+    const ADMIN_EMAIL = 'admin@rifajoaco.com';
+
+    const TOTAL_NUMBERS = 71;
+    const PRICE = 6000;
+    const nums = Array.from({length: TOTAL_NUMBERS}, (_,i)=>String(i).padStart(2,'0'));
+
+    const state = {
+      authReady:false,
+      user:null,
+      publicNumbers:{},
+      reservations:{},
+      unsubPublic:null,
+      unsubReservations:null,
+      view:'grid',
+      search:''
+    };
+
+    const $ = id => document.getElementById(id);
+    const money = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n || 0);
+    $('adminEmailLabel').textContent = ADMIN_EMAIL;
+
+    let app, auth, db;
+
+    boot();
+
+    function boot(){
+      bindEvents();
+      try{
+        validateConfig();
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        startPublicListener();
+        onAuthStateChanged(auth, user => {
+          state.user = user;
+          renderAuth();
+          if(user) startReservationListener();
+          else stopReservationListener();
+        });
+      }catch(err){
+        showFatal(err.message || String(err));
+      }
+    }
+
+    function validateConfig(){
+      if(!firebaseConfig.projectId || firebaseConfig.projectId.includes('PEGAR_')){
+        throw new Error('Falta pegar la configuración de Firebase en index.html. Buscá firebaseConfig y reemplazá los valores PEGAR_...');
+      }
+    }
+
+    function bindEvents(){
+      $('loginBtn').addEventListener('click', login);
+      $('passwordInput').addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
+      $('logoutBtn').addEventListener('click', () => signOut(auth));
+      $('waShareBtn').addEventListener('click', shareWhatsApp);
+      $('waShareTop').addEventListener('click', shareWhatsApp);
+      $('copyShareBtn').addEventListener('click', copyShareText);
+      $('copyShareTop').addEventListener('click', copyShareText);
+      $('tabGrid').addEventListener('click', () => setView('grid'));
+      $('tabList').addEventListener('click', () => setView('list'));
+      $('searchInput').addEventListener('input', e => { state.search = e.target.value.trim().toLowerCase(); renderAll(); });
+      $('overlay').addEventListener('click', e => { if(e.target.id === 'overlay') closeModal(); });
+    }
+
+    function startPublicListener(){
+      const q = query(collection(db, 'publicNumbers'), orderBy('numero'));
+      state.unsubPublic = onSnapshot(q, snap => {
+        const map = {};
+        snap.forEach(d => { map[d.id] = d.data(); });
+        state.publicNumbers = map;
+        $('loader').style.display = 'none';
+        renderAll();
+      }, err => {
+        showFatal('No se pudo leer publicNumbers. Revisá Firestore Rules y que la base esté creada. Error: ' + err.message);
+      });
+    }
+
+    function startReservationListener(){
+      stopReservationListener();
+      const q = query(collection(db, 'reservations'), orderBy('numero'));
+      state.unsubReservations = onSnapshot(q, snap => {
+        const map = {};
+        snap.forEach(d => { map[d.id] = d.data(); });
+        state.reservations = map;
+        renderAll();
+      }, err => {
+        toast('No se pudo leer reservations: ' + err.message, true);
+      });
+    }
+
+    function stopReservationListener(){
+      if(state.unsubReservations){ state.unsubReservations(); state.unsubReservations = null; }
+      state.reservations = {};
+    }
+
+    async function login(){
+      const pass = $('passwordInput').value.trim();
+      if(!pass){ toast('Ingresá la contraseña.', true); return; }
+      $('loginBtn').disabled = true;
+      $('loginBtn').textContent = 'Entrando...';
+      try{
+        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, pass);
+        $('passwordInput').value = '';
+        toast('Modo organizador activo.');
+      }catch(err){
+        toast('No se pudo ingresar. Revisá email/password de Firebase Auth. ' + err.message, true);
+      }finally{
+        $('loginBtn').disabled = false;
+        $('loginBtn').textContent = 'Entrar';
+      }
+    }
+
+    function renderAuth(){
+      const logged = !!state.user;
+      $('authSection').classList.toggle('hidden', logged);
+      $('adminBar').classList.toggle('hidden', !logged);
+      $('listSection').classList.toggle('hidden', !logged || state.view !== 'list');
+      renderAll();
+    }
+
+    function setView(view){
+      state.view = view;
+      $('tabGrid').classList.toggle('active', view === 'grid');
+      $('tabList').classList.toggle('active', view === 'list');
+      $('shareSection').classList.toggle('hidden', view === 'list');
+      $('listSection').classList.toggle('hidden', !state.user || view !== 'list');
+      renderAll();
+    }
+
+    function getPublicStatus(n){
+      const d = state.publicNumbers[n];
+      if(!d || !d.status || d.status === 'free') return {status:'free', paid:false};
+      if(d.status === 'paid' || d.paid === true) return {status:'paid', paid:true};
+      return {status:'reserved', paid:false};
+    }
+
+    function getStats(){
+      let paid=0,reserved=0,free=0;
+      nums.forEach(n => {
+        const s = getPublicStatus(n).status;
+        if(s === 'paid') paid++;
+        else if(s === 'reserved') reserved++;
+        else free++;
+      });
+      const total = TOTAL_NUMBERS * PRICE;
+      const revenue = paid * PRICE;
+      return {paid,reserved,free,total,revenue,missing:Math.max(total-revenue,0)};
+    }
+
+    function renderAll(){
+      renderStats();
+      renderShareText();
+      renderGrid();
+      renderTable();
+    }
+
+    function renderStats(){
+      const s = getStats();
+      $('stats').innerHTML = `
+        <div class="stat"><label>Recaudado</label><strong class="green">${money(s.revenue)}</strong></div>
+        <div class="stat"><label>Falta recaudar</label><strong class="warn">${money(s.missing)}</strong></div>
+        <div class="stat"><label>Pagados</label><strong>${s.paid}/${TOTAL_NUMBERS}</strong></div>
+        <div class="stat"><label>Pendientes de pago</label><strong>${s.reserved}</strong></div>
+        <div class="stat"><label>Disponibles</label><strong>${s.free}</strong></div>
+      `;
+    }
+
+    function renderShareText(){
+      $('shareText').textContent = buildShareText();
+    }
+
+    function buildShareText(){
+      const available = nums.filter(n => getPublicStatus(n).status === 'free');
+      const s = getStats();
+      return `Gran Rifa · Monopatín Eléctrico\n\nValor por número: $6.000\nDisponibles: ${available.length}/${TOTAL_NUMBERS}\n\nNúmeros disponibles:\n${available.join(', ')}\n\nRecaudado: ${money(s.revenue)}\nFalta recaudar: ${money(s.missing)}`;
+    }
+
+    function renderGrid(){
+      const grid = $('publicGrid');
+      const isAdmin = !!state.user;
+      const q = state.search;
+      grid.innerHTML = '';
+      nums.forEach(n => {
+        const st = getPublicStatus(n).status;
+        const res = state.reservations[n] || {};
+        const searchable = `${n} ${res.nombre||''} ${res.apellido||''} ${res.dni||''} ${res.direccion||''} ${res.nota||''}`.toLowerCase();
+        if(isAdmin && q && !searchable.includes(q)) return;
+        const div = document.createElement('div');
+        div.className = `num ${st} ${isAdmin ? 'admin' : ''}`;
+        div.textContent = n;
+        if(st === 'paid') div.innerHTML = `${n}<small>$</small>`;
+        if(isAdmin) div.addEventListener('click', () => openNumber(n));
+        grid.appendChild(div);
+      });
+    }
+
+    function renderTable(){
+      const body = $('reservedTable');
+      if(!body) return;
+      const q = state.search;
+      const rows = nums.map(n => ({numero:n, ...(state.reservations[n] || {})}))
+        .filter(r => r.estado === 'reserved' || r.estado === 'paid' || r.nombre || r.apellido)
+        .filter(r => !q || `${r.numero} ${r.nombre||''} ${r.apellido||''} ${r.dni||''} ${r.direccion||''} ${r.nota||''}`.toLowerCase().includes(q));
+      body.innerHTML = rows.map(r => `
+        <tr>
+          <td><b>${escapeHtml(r.numero)}</b></td>
+          <td>${escapeHtml((r.nombre||'') + ' ' + (r.apellido||''))}</td>
+          <td>${escapeHtml(r.dni||'')}</td>
+          <td>${escapeHtml(r.direccion||'')}</td>
+          <td>${escapeHtml(r.nota||'')}</td>
+          <td>${r.pagado ? '<span class="pill paid">Pagado</span>' : '<span class="pill pending">Pendiente</span>'}</td>
+          <td>${escapeHtml(r.registrado_por||'')}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="7">No hay números reservados.</td></tr>`;
+    }
+
+    function openNumber(numero){
+      const r = state.reservations[numero] || {};
+      const st = getPublicStatus(numero).status;
+      $('modal').innerHTML = `
+        <h3>Número ${numero}</h3>
+        <p class="sub">Estado actual: <b>${st === 'free' ? 'Libre' : st === 'paid' ? 'Pagado' : 'Reservado sin pagar'}</b></p>
+        <div class="field"><label>Nombre</label><input id="mNombre" value="${attr(r.nombre||'')}" placeholder="Nombre"></div>
+        <div class="field"><label>Apellido</label><input id="mApellido" value="${attr(r.apellido||'')}" placeholder="Apellido"></div>
+        <div class="field"><label>DNI</label><input id="mDni" value="${attr(r.dni||'')}" placeholder="Opcional" inputmode="numeric"></div>
+        <div class="field"><label>Dirección</label><input id="mDireccion" value="${attr(r.direccion||'')}" placeholder="Opcional"></div>
+        <div class="field"><label>Nota</label><textarea id="mNota" placeholder="Opcional">${escapeHtml(r.nota||'')}</textarea></div>
+        <div class="field"><label>Registrado por</label><select id="mRegistrado"><option>Natalia</option><option>Maxi</option><option>Otro</option></select></div>
+        <div class="field"><label>Pago</label><select id="mPagado"><option value="false">Reservado sin pagar</option><option value="true">Pagado</option></select></div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="saveBtn">Guardar / reservar</button>
+          <button class="btn btn-danger" id="releaseBtn">Liberar número</button>
+          <button class="btn btn-ghost" id="cancelBtn">Cancelar</button>
+        </div>
+      `;
+      $('mRegistrado').value = r.registrado_por || 'Natalia';
+      $('mPagado').value = r.pagado ? 'true' : 'false';
+      $('saveBtn').addEventListener('click', () => saveNumber(numero));
+      $('releaseBtn').addEventListener('click', () => releaseNumber(numero));
+      $('cancelBtn').addEventListener('click', closeModal);
+      $('overlay').classList.add('open');
+    }
+
+    async function saveNumber(numero){
+      const payload = {
+        numero,
+        estado: $('mPagado').value === 'true' ? 'paid' : 'reserved',
+        pagado: $('mPagado').value === 'true',
+        nombre: $('mNombre').value.trim(),
+        apellido: $('mApellido').value.trim(),
+        dni: $('mDni').value.trim(),
+        direccion: $('mDireccion').value.trim(),
+        nota: $('mNota').value.trim(),
+        registrado_por: $('mRegistrado').value
+      };
+      if(!payload.nombre && !payload.apellido){
+        if(!confirm('No cargaste nombre ni apellido. ¿Querés reservarlo igual?')) return;
+      }
+      try{
+        const batch = writeBatch(db);
+        const nowData = { ...payload, updatedAt: serverTimestamp() };
+        batch.set(doc(db,'reservations',numero), nowData, {merge:true});
+        batch.set(doc(db,'publicNumbers',numero), {
+          numero,
+          status: payload.pagado ? 'paid' : 'reserved',
+          paid: payload.pagado,
+          updatedAt: serverTimestamp()
+        }, {merge:true});
+        await batch.commit();
+        closeModal();
+        toast(`Número ${numero} guardado.`);
+      }catch(err){
+        toast('No se pudo guardar: ' + err.message, true);
+      }
+    }
+
+    async function releaseNumber(numero){
+      if(!confirm(`¿Liberar el número ${numero}?`)) return;
+      try{
+        const batch = writeBatch(db);
+        batch.delete(doc(db,'reservations',numero));
+        batch.set(doc(db,'publicNumbers',numero), {numero, status:'free', paid:false, updatedAt:serverTimestamp()}, {merge:true});
+        await batch.commit();
+        closeModal();
+        toast(`Número ${numero} liberado.`);
+      }catch(err){
+        toast('No se pudo liberar: ' + err.message, true);
+      }
+    }
+
+    function closeModal(){ $('overlay').classList.remove('open'); }
+
+    function shareWhatsApp(){
+      const text = encodeURIComponent(buildShareText());
+      window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener');
+    }
+
+    async function copyShareText(){
+      try{ await navigator.clipboard.writeText(buildShareText()); toast('Texto copiado.'); }
+      catch(_){ toast('No pude copiar automáticamente. Copialo desde el recuadro.', true); }
+    }
+
+    function showFatal(msg){
+      $('loader').innerHTML = `<div class="error"><b>Error de configuración</b><br>${escapeHtml(msg)}</div>`;
+      toast(msg, true);
+    }
+
+    function toast(msg, isErr=false){
+      const div = document.createElement('div');
+      div.className = 'toast' + (isErr ? ' err' : '');
+      div.textContent = msg;
+      $('toastHost').appendChild(div);
+      setTimeout(() => div.remove(), 4200);
+    }
+
+    function escapeHtml(v){ return String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+    function attr(v){ return escapeHtml(v).replace(/`/g,'&#96;'); }
+  </script>
+</body>
+</html>
