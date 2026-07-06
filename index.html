@@ -123,7 +123,8 @@
       <h1 class="display">GRAN<span class="accent">RIFA</span>MONOPATÍN<br>ELÉCTRICO</h1>
       <p class="sub">Vista pública para compartir disponibles y acceso privado para Natalia / Maxi. Los datos personales se guardan solo en Firebase y no se muestran sin iniciar sesión.</p>
       <div class="top-actions">
-        <button class="btn btn-primary" id="waShareTop">Compartir disponibles</button>
+        <button class="btn btn-primary" id="statusShareTop">Compartir estado WhatsApp</button>
+        <button class="btn btn-primary" id="waShareTop">Compartir números disponibles</button>
         <button class="btn btn-ghost" id="copyShareTop">Copiar texto</button>
       </div>
       <div class="stats" id="stats"></div>
@@ -175,7 +176,8 @@
       </div>
       <div class="share-card">
         <div class="share-actions">
-          <button class="btn btn-primary" id="waShareBtn">Compartir por WhatsApp</button>
+          <button class="btn btn-primary" id="statusShareBtn">Compartir estado WhatsApp</button>
+          <button class="btn btn-primary" id="waShareBtn">Compartir números disponibles</button>
           <button class="btn btn-ghost" id="copyShareBtn">Copiar texto</button>
         </div>
         <div class="share-text" id="shareText"></div>
@@ -225,16 +227,21 @@
     // 1) PEGAR CONFIG DE FIREBASE ACÁ
     // Firebase Console → Project settings → Your apps → Web app → Firebase SDK config
     const firebaseConfig = {
-      apiKey: 'AIzaSyDHVeZhtyY6HEZmeplMTe31NmsBkpdcqiI',
-      authDomain: 'rifa-joaco.firebaseapp.com',
-      projectId: 'rifa-joaco',
-      storageBucket: 'rifa-joaco.firebasestorage.app',
-      messagingSenderId: '477837531974',
-      appId: '1:477837531974:web:c505a704a5605388aae347'
+      apiKey: 'PEGAR_API_KEY',
+      authDomain: 'PEGAR_AUTH_DOMAIN',
+      projectId: 'PEGAR_PROJECT_ID',
+      storageBucket: 'PEGAR_STORAGE_BUCKET',
+      messagingSenderId: 'PEGAR_MESSAGING_SENDER_ID',
+      appId: 'PEGAR_APP_ID'
     };
 
     // 2) MISMO EMAIL QUE CREÁS EN FIREBASE AUTHENTICATION
     const ADMIN_EMAIL = 'admin@rifajoaco.com';
+
+    // 3) OPCIONAL: foto del monopatín para la imagen de estado.
+    // Recomendado: subir una imagen llamada monopatin.jpg junto a este index.html y dejar './monopatin.jpg'.
+    // Si lo dejás vacío, la app dibuja una ilustración simple para que el botón igual funcione.
+    const PRIZE_IMAGE_URL = './monopatin_estado.png';
 
     const TOTAL_NUMBERS = 71;
     const PRICE = 6000;
@@ -288,6 +295,8 @@
       $('loginBtn').addEventListener('click', login);
       $('passwordInput').addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
       $('logoutBtn').addEventListener('click', () => signOut(auth));
+      $('statusShareBtn').addEventListener('click', shareStatusImage);
+      $('statusShareTop').addEventListener('click', shareStatusImage);
       $('waShareBtn').addEventListener('click', shareWhatsApp);
       $('waShareTop').addEventListener('click', shareWhatsApp);
       $('copyShareBtn').addEventListener('click', copyShareText);
@@ -525,6 +534,320 @@
     }
 
     function closeModal(){ $('overlay').classList.remove('open'); }
+
+    async function shareStatusImage(){
+      const buttons = [$('statusShareBtn'), $('statusShareTop')].filter(Boolean);
+      buttons.forEach(b => { b.disabled = true; b.textContent = 'Generando imagen...'; });
+      try{
+        const blob = await buildStatusImageBlob();
+        const file = new File([blob], 'rifa-joaco-estado.png', {type:'image/png'});
+        const shareData = {
+          title: 'Gran Rifa · Monopatín Eléctrico',
+          text: 'Estado actualizado de números disponibles para la rifa.',
+          files: [file]
+        };
+
+        // En celular, esto abre el menú nativo. Ahí se elige WhatsApp → Estado.
+        if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+          await navigator.share(shareData);
+          toast('Imagen lista para compartir. Elegí WhatsApp → Estado.');
+          return;
+        }
+
+        // Fallback para PC o navegadores sin Web Share API: descarga el PNG.
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'rifa-joaco-estado.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2500);
+        toast('Se descargó la imagen. Desde el celular podés subirla como estado de WhatsApp.');
+      }catch(err){
+        toast('No pude generar la imagen: ' + (err.message || err), true);
+      }finally{
+        buttons.forEach((b, idx) => { b.disabled = false; b.textContent = 'Compartir estado WhatsApp'; });
+      }
+    }
+
+    async function buildStatusImageBlob(){
+      if(document.fonts && document.fonts.ready){
+        try{ await document.fonts.ready; }catch(_){ /* ignore */ }
+      }
+      const W = 1080;
+      const H = 1920;
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      // Fondo oscuro con halos verdes.
+      const bg = ctx.createLinearGradient(0,0,0,H);
+      bg.addColorStop(0,'#0b0f14');
+      bg.addColorStop(.52,'#101821');
+      bg.addColorStop(1,'#080c10');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0,0,W,H);
+      drawGlow(ctx, W*0.84, 160, 280, 'rgba(57,233,145,.22)');
+      drawGlow(ctx, 90, 720, 360, 'rgba(57,233,145,.12)');
+      drawGridPattern(ctx, W, H);
+
+      // Header.
+      drawSkewLabel(ctx, 64, 58, '★ RIFA JOACO ★');
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#f5f7f6';
+      ctx.font = '96px Anton, Impact, sans-serif';
+      ctx.fillText('GRAN RIFA', 64, 178);
+      ctx.fillStyle = '#39e991';
+      ctx.font = '112px Anton, Impact, sans-serif';
+      ctx.fillText('MONOPATÍN', 64, 286);
+      ctx.fillStyle = '#f5f7f6';
+      ctx.font = '86px Anton, Impact, sans-serif';
+      ctx.fillText('ELÉCTRICO', 64, 372);
+
+      // Imagen / ilustración del premio.
+      await drawPrizeBlock(ctx, 64, 420, 952, 430);
+
+      // Estadísticas.
+      const st = getStats();
+      drawStatPill(ctx, 64, 890, 290, 'DISPONIBLES', `${st.free}/${TOTAL_NUMBERS}`, '#39e991');
+      drawStatPill(ctx, 386, 890, 290, 'VALOR', '$6.000', '#f5f7f6');
+      drawStatPill(ctx, 708, 890, 308, 'PAGADOS', `${st.paid}`, '#ffcc66');
+
+      // Título grilla.
+      ctx.fillStyle = '#f5f7f6';
+      ctx.font = '56px Anton, Impact, sans-serif';
+      ctx.fillText('NÚMEROS DISPONIBLES', 64, 1056);
+      ctx.fillStyle = '#aeb8c1';
+      ctx.font = '26px Inter, Arial, sans-serif';
+      ctx.fillText('Verdes: disponibles · Grisados/tachados: ocupados', 64, 1098);
+
+      // Grilla números.
+      const cols = 9;
+      const gap = 12;
+      const size = Math.floor((W - 128 - gap*(cols-1)) / cols);
+      const startX = 64;
+      const startY = 1140;
+      nums.forEach((n, idx) => {
+        const row = Math.floor(idx / cols);
+        const col = idx % cols;
+        const x = startX + col * (size + gap);
+        const y = startY + row * (size + gap);
+        const status = getPublicStatus(n).status;
+        drawNumberTile(ctx, x, y, size, n, status);
+      });
+
+      // Footer.
+      const available = nums.filter(n => getPublicStatus(n).status === 'free');
+      ctx.fillStyle = 'rgba(18,24,32,.92)';
+      roundRect(ctx, 64, 1740, 952, 112, 28);
+      ctx.fill();
+      ctx.strokeStyle = '#26313d';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = '#39e991';
+      ctx.font = '34px Inter, Arial, sans-serif';
+      ctx.fillText(`Quedan ${available.length} números disponibles`, 96, 1804);
+      ctx.fillStyle = '#8b96a1';
+      ctx.font = '24px Inter, Arial, sans-serif';
+      ctx.fillText('Pedí el tuyo a Natalia o Maxi', 96, 1838);
+
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('El navegador no pudo exportar el PNG.')), 'image/png', 0.95);
+      });
+    }
+
+    async function drawPrizeBlock(ctx, x, y, w, h){
+      ctx.save();
+      ctx.fillStyle = '#101820';
+      roundRect(ctx, x, y, w, h, 34);
+      ctx.fill();
+      ctx.strokeStyle = '#26313d';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.clip();
+
+      const img = await tryLoadImage(PRIZE_IMAGE_URL);
+      if(img){
+        drawCoverImage(ctx, img, x, y, w, h);
+        const shade = ctx.createLinearGradient(0, y, 0, y+h);
+        shade.addColorStop(0, 'rgba(0,0,0,.05)');
+        shade.addColorStop(1, 'rgba(0,0,0,.42)');
+        ctx.fillStyle = shade;
+        ctx.fillRect(x,y,w,h);
+      }else{
+        drawScooterIllustration(ctx, x, y, w, h);
+      }
+
+      ctx.restore();
+      ctx.fillStyle = '#39e991';
+      ctx.font = '30px Inter, Arial, sans-serif';
+      ctx.fillText('Premio: monopatín eléctrico', x + 32, y + h - 34);
+    }
+
+    function tryLoadImage(src){
+      return new Promise(resolve => {
+        if(!src || !String(src).trim()) return resolve(null);
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    }
+
+    function drawCoverImage(ctx, img, x, y, w, h){
+      const ir = img.width / img.height;
+      const cr = w / h;
+      let sx=0, sy=0, sw=img.width, sh=img.height;
+      if(ir > cr){
+        sw = img.height * cr;
+        sx = (img.width - sw) / 2;
+      }else{
+        sh = img.width / cr;
+        sy = (img.height - sh) / 2;
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+    }
+
+    function drawScooterIllustration(ctx, x, y, w, h){
+      const cx = x + w/2;
+      const baseY = y + h*0.66;
+      drawGlow(ctx, cx, baseY, 260, 'rgba(57,233,145,.20)');
+      ctx.strokeStyle = '#39e991';
+      ctx.lineWidth = 18;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x+w*.26, baseY);
+      ctx.lineTo(x+w*.67, baseY);
+      ctx.lineTo(x+w*.75, y+h*.30);
+      ctx.moveTo(x+w*.75, y+h*.30);
+      ctx.lineTo(x+w*.86, y+h*.30);
+      ctx.stroke();
+      ctx.strokeStyle = '#f5f7f6';
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.moveTo(x+w*.38, baseY-4);
+      ctx.lineTo(x+w*.62, baseY-4);
+      ctx.stroke();
+      ['.28','.70'].forEach(fr => {
+        const wx = x + w*Number(fr);
+        ctx.beginPath();
+        ctx.arc(wx, baseY+48, 54, 0, Math.PI*2);
+        ctx.strokeStyle = '#26313d';
+        ctx.lineWidth = 24;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(wx, baseY+48, 30, 0, Math.PI*2);
+        ctx.strokeStyle = '#39e991';
+        ctx.lineWidth = 8;
+        ctx.stroke();
+      });
+    }
+
+    function drawNumberTile(ctx, x, y, s, n, status){
+      ctx.save();
+      if(status === 'free'){
+        ctx.fillStyle = 'rgba(57,233,145,.16)';
+        ctx.strokeStyle = '#39e991';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = 'rgba(57,233,145,.24)';
+        ctx.shadowBlur = 14;
+      }else if(status === 'paid'){
+        ctx.fillStyle = '#101820';
+        ctx.strokeStyle = '#1b6b45';
+        ctx.lineWidth = 2;
+      }else{
+        ctx.fillStyle = '#2a323b';
+        ctx.strokeStyle = '#333d47';
+        ctx.lineWidth = 2;
+      }
+      roundRect(ctx, x, y, s, s, 18);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.stroke();
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '38px Inter, Arial, sans-serif';
+      ctx.fillStyle = status === 'free' ? '#39e991' : '#66727f';
+      ctx.fillText(n, x+s/2, y+s/2+2);
+
+      if(status !== 'free'){
+        ctx.strokeStyle = 'rgba(0,0,0,.42)';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(x+16, y+s-16);
+        ctx.lineTo(x+s-16, y+16);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x+16, y+16);
+        ctx.lineTo(x+s-16, y+s-16);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawStatPill(ctx, x, y, w, label, value, color){
+      ctx.save();
+      ctx.fillStyle = 'rgba(18,24,32,.94)';
+      roundRect(ctx, x, y, w, 96, 22);
+      ctx.fill();
+      ctx.strokeStyle = '#26313d';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = '#8b96a1';
+      ctx.font = '20px Inter, Arial, sans-serif';
+      ctx.fillText(label, x+22, y+34);
+      ctx.fillStyle = color;
+      ctx.font = '40px Inter, Arial, sans-serif';
+      ctx.fillText(value, x+22, y+76);
+      ctx.restore();
+    }
+
+    function drawSkewLabel(ctx, x, y, text){
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.transform(1, 0, -0.14, 1, 0, 0);
+      ctx.fillStyle = '#39e991';
+      roundRect(ctx, 0, 0, 220, 44, 8);
+      ctx.fill();
+      ctx.fillStyle = '#06140d';
+      ctx.font = '22px Inter, Arial, sans-serif';
+      ctx.fillText(text, 18, 30);
+      ctx.restore();
+    }
+
+    function drawGlow(ctx, x, y, r, color){
+      const g = ctx.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,color);
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fill();
+    }
+
+    function drawGridPattern(ctx, w, h){
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,.035)';
+      ctx.lineWidth = 1;
+      for(let x=0;x<w;x+=54){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+      for(let y=0;y<h;y+=54){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+      ctx.restore();
+    }
+
+    function roundRect(ctx, x, y, w, h, r){
+      const rr = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.arcTo(x+w, y, x+w, y+h, rr);
+      ctx.arcTo(x+w, y+h, x, y+h, rr);
+      ctx.arcTo(x, y+h, x, y, rr);
+      ctx.arcTo(x, y, x+w, y, rr);
+      ctx.closePath();
+    }
 
     function shareWhatsApp(){
       const text = encodeURIComponent(buildShareText());
