@@ -227,12 +227,12 @@
     // 1) PEGAR CONFIG DE FIREBASE ACÁ
     // Firebase Console → Project settings → Your apps → Web app → Firebase SDK config
     const firebaseConfig = {
-      apiKey: "AIzaSyDHVeZhtyY6HEZmepLMTe31NmsBkpdCqiI",
-  authDomain: "rifa-joaco.firebaseapp.com",
-  projectId: "rifa-joaco",
-  storageBucket: "rifa-joaco.firebasestorage.app",
-  messagingSenderId: "477837531974",
-  appId: "1:477837531974:web:c505a704a5605388aae347"
+      apiKey: 'AIzaSyDHVeZhtyY6HEZmepLMTe31NmsBkpdCqiI',
+      authDomain: 'rifa-joaco.firebaseapp.com',
+      projectId: 'rifa-joaco',
+      storageBucket: 'rifa-joaco.firebasestorage.app',
+      messagingSenderId: '477837531974',
+      appId: '1:477837531974:web:c505a704a5605388aae347'
     };
 
     // 2) MISMO EMAIL QUE CREÁS EN FIREBASE AUTHENTICATION
@@ -583,75 +583,91 @@
       canvas.height = H;
       const ctx = canvas.getContext('2d');
 
-      // Fondo flyer, no captura de pantalla/app.
+      // Fondo diseñado como flyer vertical, no como captura de la web.
       const bg = ctx.createLinearGradient(0,0,0,H);
       bg.addColorStop(0,'#05080b');
-      bg.addColorStop(.42,'#0b1117');
-      bg.addColorStop(1,'#050709');
+      bg.addColorStop(.42,'#0c1319');
+      bg.addColorStop(1,'#030506');
       ctx.fillStyle = bg;
       ctx.fillRect(0,0,W,H);
-
-      // Manchas y textura.
       drawGridPattern(ctx, W, H);
-      drawGlow(ctx, 900, 130, 280, 'rgba(57,233,145,.18)');
-      drawGlow(ctx, 120, 1280, 420, 'rgba(57,233,145,.10)');
-      drawBrush(ctx, 0, 98, 430, 82, '#39e991', -7);
-      ctx.fillStyle = '#06140d';
-      ctx.font = '900 32px Inter, Arial, sans-serif';
-      ctx.fillText('$6.000 EL NÚMERO', 78, 150);
+      drawGlow(ctx, 900, 180, 360, 'rgba(57,233,145,.20)');
+      drawGlow(ctx, 120, 980, 420, 'rgba(57,233,145,.10)');
+      drawGlow(ctx, 900, 1620, 360, 'rgba(57,233,145,.10)');
 
-      // Título principal estilo pieza original.
+      // Precio arriba.
+      drawBrush(ctx, 42, 58, 430, 76, '#39e991', -5);
+      ctx.fillStyle = '#06140d';
       ctx.textAlign = 'left';
-      ctx.fillStyle = '#f5f7f6';
-      ctx.font = '100px Anton, Impact, sans-serif';
-      ctx.fillText('GRAN', 62, 270);
-      ctx.font = '158px Anton, Impact, sans-serif';
-      ctx.fillText('RIFA', 62, 420);
-      drawBrush(ctx, 54, 454, 460, 94, '#39e991', -4);
-      ctx.fillStyle = '#06140d';
-      ctx.font = '76px Anton, Impact, sans-serif';
-      ctx.fillText('MONOPATÍN', 88, 526);
-      ctx.fillStyle = '#f5f7f6';
-      ctx.font = '74px Anton, Impact, sans-serif';
-      ctx.fillText('ELÉCTRICO', 62, 622);
+      ctx.font = '900 34px Inter, Arial, sans-serif';
+      ctx.fillText('$6.000 EL NÚMERO', 88, 108);
 
-      // Producto real a la derecha.
+      // Título grande.
+      ctx.fillStyle = '#f5f7f6';
+      ctx.font = '94px Anton, Impact, sans-serif';
+      ctx.fillText('GRAN RIFA', 58, 235);
+      ctx.fillStyle = '#39e991';
+      ctx.font = '118px Anton, Impact, sans-serif';
+      ctx.fillText('MONOPATÍN', 58, 350);
+      ctx.fillStyle = '#f5f7f6';
+      ctx.font = '94px Anton, Impact, sans-serif';
+      ctx.fillText('ELÉCTRICO', 58, 448);
+
+      // Foto real del premio integrada al fondo.
       const img = await tryLoadImage(PRIZE_IMAGE_URL);
       if(img){
         ctx.save();
-        roundRect(ctx, 560, 96, 460, 440, 28);
-        ctx.clip();
-        drawCoverImage(ctx, img, 560, 96, 460, 440);
+        ctx.shadowColor = 'rgba(57,233,145,.32)';
+        ctx.shadowBlur = 42;
+        const boxX = 305, boxY = 250, boxW = 730, boxH = 590;
+        const scale = Math.min(boxW / img.width, boxH / img.height);
+        const dw = img.width * scale;
+        const dh = img.height * scale;
+        const dx = boxX + (boxW - dw) / 2;
+        const dy = boxY + (boxH - dh) / 2;
+        ctx.drawImage(img, dx, dy, dw, dh);
         ctx.restore();
-        ctx.strokeStyle = 'rgba(255,255,255,.18)';
-        ctx.lineWidth = 3;
-        roundRect(ctx, 560, 96, 460, 440, 28);
-        ctx.stroke();
       }else{
-        drawScooterIllustration(ctx, 560, 96, 460, 440);
+        drawScooterIllustration(ctx, 470, 235, 520, 500);
       }
 
-      // Llamado.
-      ctx.fillStyle = '#39e991';
-      ctx.font = '30px Inter, Arial, sans-serif';
-      ctx.fillText('SE SORTEA CUANDO', 72, 690);
-      ctx.fillStyle = '#f5f7f6';
-      ctx.font = '34px Inter, Arial, sans-serif';
-      ctx.fillText('NO HAYA MÁS NÚMEROS', 72, 732);
+      // Beneficios.
+      drawSpecBadge(ctx, 660, 492, '⚡', 'MOTOR', '250–320 W');
+      drawSpecBadge(ctx, 660, 568, '📍', 'IDEAL', 'USO DIARIO');
+      drawSpecBadge(ctx, 660, 644, '✓', 'FRENOS', 'SEGUROS');
 
-      // Resumen corto.
+      // Mensaje de sorteo.
+      ctx.fillStyle = '#39e991';
+      ctx.textAlign = 'left';
+      ctx.font = '900 32px Inter, Arial, sans-serif';
+      ctx.fillText('SE SORTEA CUANDO', 70, 695);
+      ctx.fillStyle = '#f5f7f6';
+      ctx.font = '900 38px Inter, Arial, sans-serif';
+      ctx.fillText('NO HAYA MÁS NÚMEROS', 70, 740);
+
+      // Estadísticas compactas.
       const st = getStats();
       const available = nums.filter(n => getPublicStatus(n).status === 'free');
-      drawMiniStat(ctx, 580, 610, 'DISPONIBLES', `${st.free}/${TOTAL_NUMBERS}`, '#39e991');
-      drawMiniStat(ctx, 785, 610, 'PAGADOS', `${st.paid}`, '#ffcc66');
+      drawMiniStat(ctx, 70, 780, 'DISPONIBLES', `${st.free}/${TOTAL_NUMBERS}`, '#39e991');
+      drawMiniStat(ctx, 285, 780, 'VALOR', '$6.000', '#f5f7f6');
+      drawMiniStat(ctx, 500, 780, 'PAGADOS', `${st.paid}`, '#ffcc66');
+      drawMiniStat(ctx, 715, 780, 'FALTA', money(st.missing).replace('ARS','').trim(), '#ffcc66');
 
-      // Grilla principal. Todo entra en un estado de WhatsApp sin parecer captura de app.
+      // Grilla principal 00–70.
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#f5f7f6';
+      ctx.font = '54px Anton, Impact, sans-serif';
+      ctx.fillText('NÚMEROS DISPONIBLES', 70, 925);
+      ctx.fillStyle = '#9aa5af';
+      ctx.font = '26px Inter, Arial, sans-serif';
+      ctx.fillText('Verdes: disponibles · Grisados/tachados: ocupados', 70, 964);
+
       const cols = 10;
       const gap = 6;
-      const size = 90;
+      const size = 88;
       const gridW = cols * size + (cols - 1) * gap;
       const startX = Math.floor((W - gridW) / 2);
-      const startY = 780;
+      const startY = 1005;
 
       nums.forEach((n, idx) => {
         const row = Math.floor(idx / cols);
@@ -662,26 +678,45 @@
         drawNumberTilePoster(ctx, x, y, size, n, status);
       });
 
-      // Franja final.
+      // Cierre claro para estado.
       ctx.textAlign = 'center';
       ctx.fillStyle = '#f5f7f6';
       ctx.font = '46px Anton, Impact, sans-serif';
-      ctx.fillText('SE SORTEA CUANDO', W/2, 1602);
-      drawBrush(ctx, 156, 1632, 768, 106, '#39e991', -2);
+      ctx.fillText('SE SORTEA CUANDO', W/2, 1665);
+      drawBrush(ctx, 150, 1690, 780, 106, '#39e991', -2);
       ctx.fillStyle = '#06140d';
       ctx.font = '62px Anton, Impact, sans-serif';
-      ctx.fillText('NO HAYA MÁS NÚMEROS', W/2, 1706);
-
-      ctx.fillStyle = '#8b96a1';
-      ctx.font = '30px Inter, Arial, sans-serif';
-      ctx.fillText(`Quedan ${available.length} disponibles · Valor $6.000`, W/2, 1788);
+      ctx.fillText('NO HAYA MÁS NÚMEROS', W/2, 1764);
+      ctx.fillStyle = '#dce6ea';
+      ctx.font = '32px Inter, Arial, sans-serif';
+      ctx.fillText(`Quedan ${available.length} disponibles`, W/2, 1832);
       ctx.fillStyle = '#39e991';
-      ctx.font = '34px Inter, Arial, sans-serif';
-      ctx.fillText('Pedí el tuyo a Natalia o Maxi', W/2, 1840);
+      ctx.font = '900 34px Inter, Arial, sans-serif';
+      ctx.fillText('Pedí el tuyo a Natalia o Maxi', W/2, 1880);
 
       return new Promise((resolve, reject) => {
         canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('El navegador no pudo exportar el PNG.')), 'image/png', 0.95);
       });
+    }
+
+    function drawSpecBadge(ctx, x, y, icon, a, b){
+      ctx.save();
+      ctx.fillStyle = 'rgba(3,6,8,.80)';
+      roundRect(ctx, x, y, 320, 58, 12);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(57,233,145,.48)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = '#39e991';
+      ctx.font = '28px Inter, Arial, sans-serif';
+      ctx.fillText(icon, x + 18, y + 39);
+      ctx.fillStyle = '#39e991';
+      ctx.font = '900 20px Inter, Arial, sans-serif';
+      ctx.fillText(a, x + 62, y + 26);
+      ctx.fillStyle = '#f5f7f6';
+      ctx.font = '900 20px Inter, Arial, sans-serif';
+      ctx.fillText(b, x + 62, y + 50);
+      ctx.restore();
     }
 
     function drawMiniStat(ctx, x, y, label, value, color){
