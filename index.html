@@ -153,17 +153,14 @@
         </div>
       </div>
       <div class="login-box">
-        <div class="field">
-          <label>Email admin Firebase</label>
-          <input id="emailInput" type="email" value="admin@rifajoaco.com" autocomplete="username" />
-        </div>
+        <div class="admin-email-note">Usuario organizador: <b>admin@rifajoaco.com</b></div>
         <div class="field">
           <label>Contraseña</label>
           <input id="passwordInput" type="password" placeholder="Contraseña organizador" autocomplete="current-password" />
         </div>
         <button class="btn btn-primary" id="loginBtn">Entrar</button>
       </div>
-      <p class="sub">La contraseña esperada es <b>ezjopi2026</b>. El email debe existir en Firebase Authentication → Users.</p>
+      <p class="sub">La contraseña esperada es <b>ezjopi2026</b>. El usuario técnico se usa automáticamente.</p>
     </div>
 
     <div class="section hidden" id="adminBar">
@@ -279,7 +276,7 @@
 
     const $ = id => document.getElementById(id);
     const money = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n || 0);
-    // Email visible/editable en el formulario de login.
+    // Email fijo: Natalia/Maxi solo ingresan contraseña.
 
     let app, auth, db;
 
@@ -358,9 +355,8 @@
     }
 
     async function login(){
-      const email = ($('emailInput') && $('emailInput').value ? $('emailInput').value.trim() : ADMIN_EMAIL);
+      const email = ADMIN_EMAIL;
       const pass = $('passwordInput').value.trim();
-      if(!email){ toast('Ingresá el email admin de Firebase.', true); return; }
       if(!pass){ toast('Ingresá la contraseña.', true); return; }
       $('loginBtn').disabled = true;
       $('loginBtn').textContent = 'Entrando...';
